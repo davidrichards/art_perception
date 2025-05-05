@@ -1,0 +1,8 @@
+-e .
+opencv-python
+pillow
+numpy
+scikit-learn
+requests
+typer
+rich

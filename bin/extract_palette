@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
 
-"""Console script for art_perception."""
+"""Console script for"""
 
-import art_perception
+from art_perception.domain import (
+    DEFAULT_NUM_COLORS,
+    url_to_palette,
+    path_to_palette,
+    swatches_to_visual,
+    swatches_to_json_file,
+    swatches_to_json,
+    Strategy,
+)
 from pathlib import Path
 from typing import Optional
 import sys
@@ -25,7 +33,7 @@ def main(
         help="Path to save JSON output. If not provided, output will be printed to console",
     ),
     num_colors: int = typer.Option(
-        art_perception.DEFAULT_NUM_COLORS,
+        DEFAULT_NUM_COLORS,
         "--num-colors",
         "-n",
         help="Number of colors to extract from the image",
@@ -42,6 +50,30 @@ def main(
         "-w",
         help="Width of the visual representation in characters",
     ),
+    show_json: bool = typer.Option(
+        False,
+        "--json",
+        "-j",
+        help="Show the JSON output instead of the visual representation",
+    ),
+    show_details: bool = typer.Option(
+        False,
+        "--details",
+        "-d",
+        help="Show the details of the color palette",
+    ),
+    show_palette: bool = typer.Option(
+        True,
+        "--no-palette",
+        "-np",
+        help="Show the color palette",
+    ),
+    strategy: Strategy = typer.Option(
+        Strategy.COLORFULLNESS,
+        "--strategy",
+        "-s",
+        help="Color extraction strategy to use (kmeans, histogram_peaks, or colorfulness)",
+    ),
 ):
     """Extract color palette from an image file or URL.
 
@@ -55,8 +87,11 @@ def main(
         if image_source.startswith(("http://", "https://")):
             console.print(f"Processing image from URL: {image_source}")
             try:
-                swatches = art_perception.url_to_palette(
-                    image_source, num_colors=num_colors, resize_to=resize_to
+                swatches = url_to_palette(
+                    image_source,
+                    num_colors=num_colors,
+                    resize_to=resize_to,
+                    strategy=strategy,
                 )
             except Exception as e:
                 console.print(f"[red]Error processing URL: {str(e)}[/red]")
@@ -67,38 +102,44 @@ def main(
         else:
             console.print(f"Processing image from path: {image_source}")
             try:
-                swatches = art_perception.path_to_palette(
-                    image_source, num_colors=num_colors, resize_to=resize_to
+                swatches = path_to_palette(
+                    image_source,
+                    num_colors=num_colors,
+                    resize_to=resize_to,
+                    strategy=strategy,
                 )
             except Exception as e:
                 console.print(f"[red]Error processing file: {str(e)}[/red]")
                 raise typer.Exit(1)
 
         # Display visual representation
-        visual = art_perception.swatches_to_visual(swatches, width=visual_width)
-        console.print("\nColor Palette Visualization:")
-        console.print(Panel(visual, title="Color Proportions", border_style="dim"))
+        if show_palette:
+            visual = swatches_to_visual(swatches, width=visual_width)
+            console.print("\nColor Palette Visualization:")
+            console.print(Panel(visual, title="Color Proportions", border_style="dim"))
 
         # Display color details
-        console.print("\nColor Details:")
-        for swatch in swatches:
-            console.print(
-                f"RGB: {swatch.rgb}  Hex: {swatch.hex}  Proportion: {swatch.proportion:.2%}"
-            )
+        if show_details:
+            console.print("\nColor Details:")
+            for swatch in swatches:
+                console.print(
+                    f"RGB: {swatch.rgb}  Hex: {swatch.hex}  Proportion: {swatch.proportion:.2%}"
+                )
 
         # Handle output
         if output_path:
             try:
-                art_perception.swatches_to_json_file(swatches, str(output_path))
+                swatches_to_json_file(swatches, str(output_path))
                 console.print(f"\n[green]Color palette saved to {output_path}[/green]")
             except Exception as e:
                 console.print(f"[red]Error saving to file: {str(e)}[/red]")
                 raise typer.Exit(1)
         else:
             try:
-                json_output = art_perception.swatches_to_json(swatches)
-                console.print("\nJSON Output:")
-                console.print(json_output)
+                if show_json:
+                    json_output = swatches_to_json(swatches)
+                    console.print("\nJSON Output:")
+                    console.print(json_output)
             except Exception as e:
                 console.print(f"[red]Error generating JSON: {str(e)}[/red]")
                 raise typer.Exit(1)
