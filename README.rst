@@ -30,7 +30,72 @@ Art Perception contains all the tools you need to obegin observing attributes fo
 Features
 --------
 
-* TODO
+Extract Palette
+~~~~~~~~~~~~~
+
+The extract-palette utility allows you to extract color palettes from images using various strategies. You can process both local images and images from URLs.
+
+Basic Usage
+^^^^^^^^^^
+
+Process an image from a URL:
+
+.. code-block:: bash
+
+   ./bin/extract-palette https://example.com/image.jpg
+
+Process a local image:
+
+.. code-block:: bash
+
+   ./bin/extract-palette path/to/local/image.jpg
+
+Available Strategies
+^^^^^^^^^^^^^^^^^
+
+The tool offers three different strategies for color extraction:
+
+1. **Colorfulness** (default): Extracts vibrant colors by ranking pixels by colorfulness and clustering in LAB space. Best for finding the most visually striking colors.
+
+2. **KMeans**: Uses K-means clustering to find the most representative colors in the image. Good for finding dominant color groups.
+
+3. **Histogram Peaks**: Extracts vibrant, diverse colors using 3D HSV histogram binning. Effective for finding distinct color regions.
+
+To specify a strategy, use the --strategy option:
+
+.. code-block:: bash
+
+   ./bin/extract-palette image.jpg --strategy kmeans
+   ./bin/extract-palette image.jpg --strategy histogram_peaks
+   ./bin/extract-palette image.jpg --strategy colorfulness
+
+Additional Options
+^^^^^^^^^^^^^^^
+
+* ``--num-colors`` or ``-n``: Number of colors to extract (default: 6)
+* ``--resize`` or ``-r``: Size to resize the image to before processing (default: 200 pixels)
+* ``--width`` or ``-w``: Width of the visual representation in characters (default: 80)
+* ``--json`` or ``-j``: Show the JSON output instead of the visual representation
+* ``--details`` or ``-d``: Show detailed information about each color
+* ``--no-palette`` or ``-np``: Hide the color palette visualization
+* ``--output`` or ``-o``: Save the output to a JSON file
+
+Example with Options
+^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   ./bin/extract-palette image.jpg --strategy kmeans --num-colors 8 --resize 300 --width 100 --details --output palette.json
+
+Output Format
+^^^^^^^^^^^
+
+The tool provides both visual and JSON output formats. The JSON output includes:
+
+* RGB values for each color
+* Hex color codes
+* Proportion of each color in the image
+
 
 Credits
 -------
