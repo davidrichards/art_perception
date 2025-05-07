@@ -1,0 +1,13 @@
+services:
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - ~/.gitconfig:/root/.gitconfig:ro  # Share git config
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+    # Keep container running
+    command: sleep infinity

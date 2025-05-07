@@ -1,7 +1,8 @@
--e .
+numpy
 opencv-python
 pillow
-numpy
+pydantic==2.11.4
+pydantic_core==2.33.2
 scikit-learn
 requests
 typer
